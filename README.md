@@ -2,4 +2,4 @@
 
 Using python to draw Infrastructure Diagrams
 
-![Diagram Generated](./backend_api-service.png)
+![Diagram Generated](./infrastructure_diagram.png)

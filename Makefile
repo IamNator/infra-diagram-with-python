@@ -1,7 +1,9 @@
 
+set:
+    export COMPANY_NAME="some_company"
 
 run: diagram.py
-    python diagram.py >> x_architecture.png
+    python diagram.py
 
 setup:
     pip install diagrams

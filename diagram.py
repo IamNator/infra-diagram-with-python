@@ -1,3 +1,4 @@
+from os import environ
 from diagrams import Diagram, Cluster, Edge
 from diagrams.saas.cdn import Cloudflare
 from diagrams.onprem.client import User
@@ -11,15 +12,16 @@ from diagrams.aws.storage import SimpleStorageServiceS3BucketWithObjects
 from diagrams.programming.language import Go as Golang, Javascript, Typescript
 
 
-def create_cloud_infrastructure_diagram():
+def create_cloud_infrastructure_diagram(company_name = ""):
     """
     Creates a diagram of the cloud infrastructure for the web application.
     """
 
-    with Diagram("Cloud Infrastructe",
-                filename="backend_api_service",
+    with Diagram(company_name + " Cloud Infrastructure",
+                filename="infrastructure_diagram",
                 show=False,
-                direction="LR"
+                direction="LR",
+                outformat="png"
                 ):
 
         with Cluster("EKS Cluster", graph_attr={
@@ -127,5 +129,5 @@ def create_cloud_infrastructure_diagram():
             >> s3_bucket
 
         
-
-create_cloud_infrastructure_diagram()
+company_name = environ.get("COMPANY_NAME")
+create_cloud_infrastructure_diagram(company_name=company_name)
