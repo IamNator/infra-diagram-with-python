@@ -11,6 +11,8 @@ with Diagram("EKS Architecture", show=False):
 
         ingress_controller = IngressController("Ingress Controller")
 
+        typescript_app = Typescript("Frontend App")
+
         api_gateway = Typescript("API Gateway")
 
         golang_services = [
@@ -19,8 +21,5 @@ with Diagram("EKS Architecture", show=False):
             Golang("Notification Service")
         ]
         
-
-    typescript_app = Typescript("Frontend App")
-
-    User("End User") >> ELB("Load Balancer") >> typescript_app >> api_gateway >> golang_services 
+    User("End User") >> ELB("Load Balancer") >> ingress_controller >>  typescript_app >> api_gateway >> golang_services 
 
