@@ -1,28 +1,131 @@
-from diagrams import Diagram, Cluster
-from diagrams.aws.compute import EKS
+from diagrams import Diagram, Cluster, Edge
+from diagrams.saas.cdn import Cloudflare
 from diagrams.onprem.client import User
 from diagrams.aws.network import ELB
-from diagrams.k8s.network import Ing as IngressController
-from diagrams.programming.language import Go as Golang, Typescript
+from diagrams.onprem.network import Nginx
+from diagrams.onprem.aggregator import Fluentd
+from diagrams.elastic.elasticsearch import Elasticsearch
+from diagrams.programming.framework import React
+from diagrams.onprem.database import Mongodb
+from diagrams.aws.storage import SimpleStorageServiceS3BucketWithObjects
+from diagrams.programming.language import Go as Golang, Javascript, Typescript
 
-with Diagram("EKS Architecture", show=False):
 
-    with Cluster("Backend API service"):
+def create_cloud_infrastructure_diagram():
+    """
+    Creates a diagram of the cloud infrastructure for the web application.
+    """
 
-        ingress_controller = IngressController("Ingress Controller")
+    with Diagram("Cloud Infrastructe",
+                filename="backend_api_service",
+                show=False,
+                direction="LR"
+                ):
 
-        frontend_service = Typescript("Frontend App")
+        with Cluster("EKS Cluster", graph_attr={
+            # "pad": "6.0",
+            "center": "true"
+        }):
+            
+            with Cluster("Controller",graph_attr = {
+                "bgcolor": "transparent",
+            }):
+                ingress_controller = Nginx("Ingress \nController")
 
-        api_gateway = Typescript("API Gateway")
+            with Cluster("Frontend App",graph_attr = {
+                "bgcolor": "transparent",
+                "fontcolor": "bold",
+            }):
+                frontend_service = React("Frontend App")
+        
+            with Cluster("Backend \nAPI Services",graph_attr = {
+                "bgcolor": "transparent",
+                "fontcolor": "bold", 
+            }):
+                api_gateway = Typescript("API \nGateway") 
 
-        golang_services = [
-            Golang("Auth Service"),
-            Golang("Company Service"),
-            Golang("Notification Service")
-        ]
+            
+                with Cluster(label="Microservices", graph_attr = {
+                    "bgcolor": "transparent",
+                    "style": "invis",
+                }):
+                    microservices = [
+                        Typescript("Auth API\nService"),
+                        Golang("Company API\nService"),
+                        Javascript("Notification API\nService")
+                    ]
+
+
+            with Cluster(label="Metrics \nCollection", graph_attr = {
+                "bgcolor": "transparent",
+                "fontcolor": "bold",
+                "comment": "Responsible for logging collection and parsing"
+            }):
+                aggregator = Fluentd("Fluentd\n(Logging)")
+                
+        with Cluster("External", graph_attr = {
+                "bgcolor": "transparent",
+                "fontcolor": "invis",
+            }):
+            
+            with Cluster("Database", graph_attr = {
+                "bgcolor": "transparent",
+            }):
+                mongo_db = Mongodb("MongoDB")
+            
+            elasticsearch = Elasticsearch("Elasticsearch")
+            s3_bucket = SimpleStorageServiceS3BucketWithObjects("S3 Bucket")
+        
+
+        # CONNECTIONS
+            
+        __ingres_color__ = "darkgreen"
+        __api_gate_conn__ = "darkblue"
+        __metrics__ = "darkorange"
+        __database__ = "darkblue"
+                    
+        load_balancer = ELB("Load Balancer")
+
+        User("End User") >> Cloudflare("Cloudflare") >> load_balancer
+
+        load_balancer \
+            >> Edge(color=__ingres_color__, style="bold") \
+            >>  ingress_controller
+
+        ingress_controller \
+            >> Edge(color=__ingres_color__, style="bold") \
+            >> frontend_service
+        
+        frontend_service \
+            >> Edge(color=__metrics__,style="dashed") \
+            >> aggregator
+        
+        ingress_controller \
+            >> Edge(color=__ingres_color__, style="bold") \
+            >> api_gateway
+        
+        api_gateway \
+            >> Edge(color=__metrics__,style="dashed") \
+            >> aggregator
+
+        api_gateway \
+            >> Edge(color=__api_gate_conn__, label="REST") \
+            >> microservices
+        
+        microservices \
+            >> Edge(color=__metrics__,style="dashed") \
+            >> aggregator
+        
+        microservices \
+            >> Edge(color=__database__, style="dashed") \
+            >> mongo_db
+
+        aggregator \
+            >> elasticsearch
+
+        aggregator \
+            >> s3_bucket
 
         
-    User("End User") >> ELB("Load Balancer") >> ingress_controller
-    
-    ingress_controller >>  frontend_service >> api_gateway >> golang_services 
 
+create_cloud_infrastructure_diagram()
