@@ -8,16 +8,20 @@ from diagrams.programming.language import Go as Golang, Typescript
 with Diagram("EKS Architecture", show=False):
 
     with Cluster("Backend API service"):
+
+        ingress_controller = IngressController("Ingress Controller")
+
         api_gateway = Typescript("API Gateway")
+
         golang_services = [
             Golang("Auth Service"),
             Golang("Company Service"),
             Golang("Notification Service")
         ]
         
-        ingress_controller = IngressController("Ingress Controller")
+        
 
     typescript_app = Typescript("Frontend App")
 
-    User("End User") >> ELB("Load Balancer") >> ingress_controller >> api_gateway >> golang_services 
-    typescript_app >> api_gateway
+    User("End User") >> ELB("Load Balancer") >> ingress_controller >> typescript_app >> api_gateway >> golang_services 
+
