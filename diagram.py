@@ -16,7 +16,6 @@ with Diagram("EKS Architecture", show=False):
         ]
 
     typescript_app = Typescript("Frontend App")
-    redis_cache = Redis("Redis Cache")
 
-    User("End User") >> ELB("Load Balancer") >> api_gateway >> golang_services >> redis_cache
-    typescript_app >> ELB("Load Balancer")
+    User("End User") >> ELB("Load Balancer") >> typescript_app >> api_gateway >> golang_services 
+
