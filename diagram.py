@@ -1,23 +1,22 @@
 from diagrams import Diagram, Cluster
-from diagrams.aws.compute import EC2
+from diagrams.aws.compute import EKS
 from diagrams.onprem.client import User
 from diagrams.aws.network import ELB
 from diagrams.aws.database import ElasticacheForRedis as Redis
-# from diagrams.programming.language import Go
+from diagrams.programming.language import Go as Golang, Typescript
 
-with Diagram("X Architecture", show=False):
+with Diagram("EKS Architecture", show=False):
 
     with Cluster("Backend API service"):
-        api_srv = [
-            EC2("Instance 1"),
-            EC2("Instance 2"),
-            EC2("Instance 3")
+        api_gateway = Typescript("API Gateway")
+        golang_services = [
+            Golang("Service 1"),
+            Golang("Service 2"),
+            Golang("Service 3")
         ]
 
-    notification_srv = EC2("Notification Service")
+    typescript_app = Typescript("Frontend App")
+    redis_cache = Redis("Redis Cache")
 
-    queue = Redis("Redis Server")
-
-
-
-    User("Front End") >> ELB("load balancer") >> api_srv >> queue >> notification_srv
+    User("End User") >> ELB("Load Balancer") >> api_gateway >> golang_services >> redis_cache
+    typescript_app >> ELB("Load Balancer")
