@@ -21,5 +21,6 @@ with Diagram("EKS Architecture", show=False):
             Golang("Notification Service")
         ]
         
+        
     User("End User") >> ELB("Load Balancer") >> ingress_controller >>  typescript_app >> api_gateway >> golang_services 
 
